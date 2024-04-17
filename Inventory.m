@@ -312,16 +312,16 @@ classdef Inventory < handle
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function delay_time_backlogged = delay_time_backlogged(obj, order)
-    obj.TotalOrdersReceived = obj.TotalOrdersReceived + 1;
-    delay_time_backlogged = 0;
-    
-    if obj.OnHand < order.Amount
-        obj.TotalBackloggedOrders = obj.TotalBackloggedOrders + 1;
-        delay_time_backlogged = obj.Time - order.OriginalTime;
-        obj.BackloggedOrderDelayTimes(end+1) = delay_time_backlogged;
-    end
-end
+function delaytimes = delay_time_backlogged(obj)
+                delaytimes = [];
+                for j = 1:length(obj.Fulfilled)
+                order = obj.Fulfilled{j};
+                if order.OriginalTime < order.Time
+                    %order was backlogged 
+                    delaytimes(end+1) = order.Time - order.OriginalTime;
+                end
+                end
+        end
     end
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
