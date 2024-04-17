@@ -88,6 +88,23 @@ classdef Inventory < handle
 
         % Fulfilled - List of fulfilled orders.
         Fulfilled = {};
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % Total number of orders received.
+        TotalOrdersReceived = 0;
+
+        % Total number of backlogged orders.
+        TotalBackloggedOrders = 0;
+
+        % Total number of days with a non-zero backlog.
+        TotalDaysWithBacklog = 0;
+
+        % Total number of days.
+        TotalDays = 0;
+
+        BackloggedOrderDelayTimes = [];
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     end
     methods
         function obj = Inventory(KWArgs)
@@ -221,7 +238,12 @@ classdef Inventory < handle
             end
             maybe_request_more(obj);
         end
-
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        function mean_fraction_backlogged = mean_fraction_backlogged(obj)
+            mean_fraction_backlogged = obj.TotalBackloggedOrders / obj.TotalOrdersReceived;
+        end
+   
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         function handle_end_day(obj, ~)
             % handle_end_day Handle an EndDay event.
             %
@@ -257,5 +279,51 @@ classdef Inventory < handle
             tb = total_backlog(obj);
             obj.Log(end+1, :) = {obj.Time, obj.OnHand, tb, obj.RunningCost};
         end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+        function frac = fraction_orders_backlogged(obj)
+        NFulfilled = length(obj.Fulfilled);
+        NBacklogged = 0;  
+        for j = 1:NFulfilled
+            x = obj.Fulfilled{j};
+            if x.Time > x.OriginalTime
+            NBacklogged = NBacklogged + 1;
+            end
+        end
+        frac = NBacklogged / NFulfilled;  
+            %fprintf("Fraction of orders backlogged: %f\n", frac);  
+        end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+        function frac = fraction_days_with_backlog(obj)
+            obj.TotalDays = obj.TotalDays + 1;
+            if total_backlog(obj) > 0
+                obj.TotalDaysWithBacklog = obj.TotalDaysWithBacklog + 1;
+            end
+            
+            days_with_backlog = obj.TotalDaysWithBacklog;
+            total_days = obj.TotalDays;
+            frac = days_with_backlog / total_days;
+        end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function delay_time_backlogged = delay_time_backlogged(obj, order)
+    obj.TotalOrdersReceived = obj.TotalOrdersReceived + 1;
+    delay_time_backlogged = 0;
+    
+    if obj.OnHand < order.Amount
+        obj.TotalBackloggedOrders = obj.TotalBackloggedOrders + 1;
+        delay_time_backlogged = obj.Time - order.OriginalTime;
+        obj.BackloggedOrderDelayTimes(end+1) = delay_time_backlogged;
     end
 end
+    end
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
