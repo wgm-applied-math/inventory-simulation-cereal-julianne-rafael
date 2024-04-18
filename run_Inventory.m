@@ -125,23 +125,26 @@ xlabel('Fraction');
 ylabel('Probability');
 pause(2);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Collect statistics4
-DelayTimes = zeros(1, 0); % Preallocate an empty array
+%% Collect statistics4 
+delayTimesAllSamples = []; 
 
 for SampleNum = 1:NumSamples
     inventory = InventorySamples{SampleNum};
-    DelayTimes = [DelayTimes, inventory.BackloggedOrderDelayTimes];
+    delayTimesAllSamples = [delayTimesAllSamples, delay_time_backlogged(inventory)];
 end
 
-mean_delay_time_backlogged = mean(DelayTimes); % Compute mean of delay times
-fprintf("Mean Delay Time of Backlogged Orders: %f\n", mean_delay_time_backlogged);
-
 % Plot histogram of delay times
-figure();
-histogram(DelayTimes, 'Normalization', 'probability');
+figure;
+histogram(delayTimesAllSamples, 'Normalization', 'probability');
 title('Delay Times of Backlogged Orders');
 xlabel('Delay Time');
 ylabel('Probability');
+
+% Compute mean delay time of backlogged orders
+mean_delay_time_backlogged = mean(delayTimesAllSamples);
+fprintf("Mean Delay Time of Backlogged Orders: %f\n", mean_delay_time_backlogged);
+
+
 pause(2);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Collect statistics5
