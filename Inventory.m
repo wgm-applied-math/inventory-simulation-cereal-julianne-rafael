@@ -1,4 +1,4 @@
-classdef Inventory < handle
+classdef AprilInventory < handle
     % Inventory Simulation of an inventory system.
     %   Simulation object that keeps track of orders, incoming material,
     %   outoing material, material on hand, and costs.
@@ -256,9 +256,7 @@ classdef Inventory < handle
             maybe_request_more(obj);
         end
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        function mean_fraction_backlogged = mean_fraction_backlogged(obj)
-            mean_fraction_backlogged = obj.TotalBackloggedOrders / obj.TotalOrdersReceived;
-        end
+        
    
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         function handle_end_day(obj, ~)
