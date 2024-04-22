@@ -239,10 +239,7 @@ classdef Inventory < handle
             maybe_request_more(obj);
         end
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        function mean_fraction_backlogged = mean_fraction_backlogged(obj)
-            mean_fraction_backlogged = obj.TotalBackloggedOrders / obj.TotalOrdersReceived;
-        end
-   
+       
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         function handle_end_day(obj, ~)
             % handle_end_day Handle an EndDay event.
