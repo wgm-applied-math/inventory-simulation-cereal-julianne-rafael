@@ -79,9 +79,6 @@ title(ax, "Daily total cost");
 xlabel(ax, "Dollars");
 ylabel(ax, "Probability");
 
-% Fix the axis ranges
-ylim(ax, [0, 0.5]);
-xlim(ax, [240, 290]);
 
 % Wait for MATLAB to catch up.
 pause(2);
@@ -110,16 +107,16 @@ ylabel('Probability');
 pause(2);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Collect statistics3
-MeanFractionDaysWithBacklog = zeros(NumSamples, 1);
+FractionDaysWithBacklog = zeros(NumSamples, 1);
 for SampleNum = 1:NumSamples
-    MeanFractionDaysWithBacklog(SampleNum) = InventorySamples{SampleNum}.fraction_days_with_backlog();
+    FractionDaysWithBacklog(SampleNum) = InventorySamples{SampleNum}.fraction_days_with_backlog();
 end
-meanFractionDaysWithBacklog = mean(MeanFractionDaysWithBacklog);
+meanFractionDaysWithBacklog = mean(FractionDaysWithBacklog);
 fprintf("Mean Fraction of Days With Non-Zero Backlog: %f\n", meanFractionDaysWithBacklog);
 
 % Plot histogram for the fraction of days with a non-zero backlog
 figure;
-histogram(MeanFractionDaysWithBacklog, 'Normalization', 'probability');
+histogram(FractionDaysWithBacklog, 'Normalization', 'probability');
 title('Fraction of Days With Non-Zero Backlogs');
 xlabel('Fraction');
 ylabel('Probability');
