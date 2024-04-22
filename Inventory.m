@@ -1,4 +1,4 @@
-classdef AprilInventory < handle
+classdef Inventory < handle
     % Inventory Simulation of an inventory system.
     %   Simulation object that keeps track of orders, incoming material,
     %   outoing material, material on hand, and costs.
