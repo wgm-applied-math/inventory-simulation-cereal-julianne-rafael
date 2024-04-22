@@ -117,13 +117,18 @@ end
 meanFractionDaysWithBacklog = mean(MeanFractionDaysWithBacklog);
 fprintf("Mean Fraction of Days With Non-Zero Backlog: %f\n", meanFractionDaysWithBacklog);
 
-% Plot histogram for the fraction of days with a non-zero backlog
+binWidth = 0.5; 
+
+% Plot histogram for fraction of days with a non-zero backlog
 figure;
-histogram(MeanFractionDaysWithBacklog, 'Normalization', 'probability');
+histogram(FractionDaysWithBacklog, 'BinWidth', binWidth, 'Normalization', 'probability', 'BinLimits', [0, 1]);
 title('Fraction of Days With Non-Zero Backlogs');
 xlabel('Fraction');
 ylabel('Probability');
 pause(2);
+
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Collect statistics4 
 delayTimesAllSamples = []; 
