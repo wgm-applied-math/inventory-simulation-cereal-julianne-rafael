@@ -45,7 +45,7 @@ classdef Inventory < handle
 
         % RequestLeadTime - When a batch is requested, it will be this
         % many time step before the batch arrives.
-        RequestLeadTime = 2;
+        RequestLeadTime = 2.0;
 
         % OutgoingSizeDist - Distribution sampled to determine the size of
         % random outgoing orders placed to this inventory.
@@ -89,15 +89,22 @@ classdef Inventory < handle
         % Fulfilled - List of fulfilled orders.
         Fulfilled = {};
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        
-        %LeadTimes = [2, 3, 4, 5];
-        %Probabilities = [0.1, 0.2, 0.4, 0.3];
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % Total number of orders received.
+        TotalOrdersReceived = 0;
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % Total number of backlogged orders.
+        TotalBackloggedOrders = 0;
 
+        % Total number of days with a non-zero backlog.
+        TotalDaysWithBacklog = 0;
+
+        % Total number of days.
+        TotalDays = 0;
+
+        BackloggedOrderDelayTimes = [];
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     end
     methods
         function obj = Inventory(KWArgs)
@@ -208,7 +215,6 @@ classdef Inventory < handle
                 obj.RunningCost = obj.RunningCost + order_cost;
 
 
-
                 L = rand;
                 if L<=0.1
                     select=2;
@@ -249,7 +255,12 @@ classdef Inventory < handle
             end
             maybe_request_more(obj);
         end
-
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        function mean_fraction_backlogged = mean_fraction_backlogged(obj)
+            mean_fraction_backlogged = obj.TotalBackloggedOrders / obj.TotalOrdersReceived;
+        end
+   
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         function handle_end_day(obj, ~)
             % handle_end_day Handle an EndDay event.
             %
@@ -285,9 +296,51 @@ classdef Inventory < handle
             tb = total_backlog(obj);
             obj.Log(end+1, :) = {obj.Time, obj.OnHand, tb, obj.RunningCost};
         end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+        function frac = fraction_orders_backlogged(obj)
+        NFulfilled = length(obj.Fulfilled);
+        NBacklogged = 0;  
+        for j = 1:NFulfilled
+            x = obj.Fulfilled{j};
+            if x.Time > x.OriginalTime
+            NBacklogged = NBacklogged + 1;
+            end
+        end
+        frac = NBacklogged / NFulfilled;  
+            %fprintf("Fraction of orders backlogged: %f\n", frac);  
+        end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+        function frac = fraction_days_with_backlog(obj)
+            obj.TotalDays = obj.TotalDays + 1;
+            if total_backlog(obj) > 0
+                obj.TotalDaysWithBacklog = obj.TotalDaysWithBacklog + 1;
+            end
+            
+            days_with_backlog = obj.TotalDaysWithBacklog;
+            total_days = obj.TotalDays;
+            frac = days_with_backlog / total_days;
+        end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function delaytimes = delay_time_backlogged(obj)
+                delaytimes = [];
+                for j = 1:length(obj.Fulfilled)
+                order = obj.Fulfilled{j};
+                if order.OriginalTime < order.Time
+                    %order was backlogged 
+                    delaytimes(end+1) = order.Time - order.OriginalTime;
+                end
+                end
+        end
     end
 end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
-
-        
