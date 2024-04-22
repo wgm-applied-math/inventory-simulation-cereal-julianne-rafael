@@ -13,10 +13,6 @@ c = 3.00;
 % Lead time for production requests.
 L = 2;
 
-%LeadTimes = [2, 3, 4, 5];
-%Probabilities = [0.1, 0.2, 0.4, 0.3];
-
-
 % Holding cost per unit per day.
 h = 0.05/7;
 
@@ -55,9 +51,10 @@ for SampleNum = 1:NumSamples
     run_until(inventory, MaxTime);
     InventorySamples{SampleNum} = inventory;
 end
-
-%% Collect statistics
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Collect statistics1
 % Pull the RunningCost from each complete sample.
 TotalCosts = cellfun(@(i) i.RunningCost, InventorySamples);
 
@@ -91,3 +88,85 @@ pause(2);
 
 % Save figure as a PDF file
 exportgraphics(fig, "Daily cost histogram.pdf");
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Collect statistics2
+FractionBacklogged = zeros(NumSamples, 1);
+for SampleNum = 1:NumSamples
+    FractionBacklogged(SampleNum) = InventorySamples{SampleNum}.fraction_orders_backlogged();
+end
+meanFractionBacklogged = mean(FractionBacklogged);
+fprintf("Mean Fraction of Orders Backlogged: %f\n", meanFractionBacklogged);
+
+
+% Plot a histogram of the fractions of orders backlogged
+figure;
+histogram(FractionBacklogged, 'Normalization', 'probability');
+title('Fraction of Orders Backlogged');
+xlabel('Fraction');
+ylabel('Probability');
+
+
+pause(2);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Collect statistics3
+MeanFractionDaysWithBacklog = zeros(NumSamples, 1);
+for SampleNum = 1:NumSamples
+    MeanFractionDaysWithBacklog(SampleNum) = InventorySamples{SampleNum}.fraction_days_with_backlog();
+end
+meanFractionDaysWithBacklog = mean(MeanFractionDaysWithBacklog);
+fprintf("Mean Fraction of Days With Non-Zero Backlog: %f\n", meanFractionDaysWithBacklog);
+
+% Plot histogram for the fraction of days with a non-zero backlog
+figure;
+histogram(MeanFractionDaysWithBacklog, 'Normalization', 'probability');
+title('Fraction of Days With Non-Zero Backlogs');
+xlabel('Fraction');
+ylabel('Probability');
+pause(2);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Collect statistics4 
+delayTimesAllSamples = []; 
+
+for SampleNum = 1:NumSamples
+    inventory = InventorySamples{SampleNum};
+    delayTimesAllSamples = [delayTimesAllSamples, delay_time_backlogged(inventory)];
+end
+
+% Plot histogram of delay times
+figure;
+histogram(delayTimesAllSamples, 'Normalization', 'probability');
+title('Delay Times of Backlogged Orders');
+xlabel('Delay Time');
+ylabel('Probability');
+
+% Compute mean delay time of backlogged orders
+mean_delay_time_backlogged = mean(delayTimesAllSamples);
+fprintf("Mean Delay Time of Backlogged Orders: %f\n", mean_delay_time_backlogged);
+
+
+pause(2);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Collect statistics5
+TotalBacklogPerDay = zeros(NumSamples, 1);
+for SampleNum = 1:NumSamples
+    inventory = InventorySamples{SampleNum};
+    TotalBacklogPerDay(SampleNum) = sum(cellfun(@(x) x.Amount, inventory.Backlog));
+end
+DaysWithBacklog = TotalBacklogPerDay > 0;
+MeanTotalBacklog = mean(TotalBacklogPerDay(DaysWithBacklog));
+fprintf("Mean Total Backlog Amount on Days with Backlog: %f\n", MeanTotalBacklog);
+
+
+% Plot histogram for total backlog amount on days with backlog
+figure();
+histogram(TotalBacklogPerDay(DaysWithBacklog), 'Normalization', 'probability');
+title('Total Backlog Amount on Days with Backlog');
+xlabel('Total Backlog Amount');
+ylabel('Probability');
+
+pause(2)
+
+
+
+
