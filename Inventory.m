@@ -102,7 +102,9 @@ classdef Inventory < handle
         % Total number of days.
         TotalDays = 0;
 
-        BackloggedOrderDelayTimes = [];
+
+
+        delaytimes = []
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     end
@@ -235,12 +237,12 @@ classdef Inventory < handle
                 obj.Fulfilled{end+1} = order;
             else
                 obj.Backlog{end+1} = order;
+
             end
             maybe_request_more(obj);
         end
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-       
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
         function handle_end_day(obj, ~)
             % handle_end_day Handle an EndDay event.
             %
@@ -260,16 +262,23 @@ classdef Inventory < handle
             record_log(obj);
             % Schedule the beginning of the next day to happen immediately.
             schedule_event(obj, BeginDay(Time=obj.Time));
+
+
+            if total_backlog(obj) > 0
+                obj.TotalDaysWithBacklog = obj.TotalDaysWithBacklog + 1;
+            end
         end
 
+
+
         function tb = total_backlog(obj)
-            % total_backlog Compute the total amount of all backlogged
-            % orders.
+            %total_backlog Compute the total amount of all backlogged orders.
             tb = 0;
             for j = 1:length(obj.Backlog)
                 tb = tb + obj.Backlog{j}.Amount;
             end
         end
+
 
         function record_log(obj)
             % record_log Add an entry to the Log table.
@@ -278,7 +287,6 @@ classdef Inventory < handle
         end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
         function frac = fraction_orders_backlogged(obj)
         NFulfilled = length(obj.Fulfilled);
         NBacklogged = 0;  
@@ -294,8 +302,7 @@ classdef Inventory < handle
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
+        
         function frac = fraction_days_with_backlog(obj)
             obj.TotalDays = obj.TotalDays + 1;
             if total_backlog(obj) > 0
@@ -307,9 +314,10 @@ classdef Inventory < handle
             frac = days_with_backlog / total_days;
         end
 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function delaytimes = delay_time_backlogged(obj)
+        function delaytimes = delay_time_backlogged(obj)
                 delaytimes = [];
                 for j = 1:length(obj.Fulfilled)
                 order = obj.Fulfilled{j};
@@ -323,4 +331,3 @@ function delaytimes = delay_time_backlogged(obj)
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
