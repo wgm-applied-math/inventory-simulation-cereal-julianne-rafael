@@ -11,7 +11,7 @@ K = 25.00;
 c = 3.00;
 
 % Lead time for production requests.
-L = 2;
+L = 2.0;
 
 % Holding cost per unit per day.
 h = 0.05/7;
@@ -81,7 +81,7 @@ ylabel(ax, "Probability");
 
 % Fix the axis ranges
 ylim(ax, [0, 0.5]);
-xlim(ax, [240, 290]);
+xlim(ax, [197, 297]);
 
 % Wait for MATLAB to catch up.
 pause(2);
@@ -110,24 +110,20 @@ ylabel('Probability');
 pause(2);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Collect statistics3
-MeanFractionDaysWithBacklog = zeros(NumSamples, 1);
+FractionDaysWithBacklog = zeros(NumSamples, 1);
 for SampleNum = 1:NumSamples
-    MeanFractionDaysWithBacklog(SampleNum) = InventorySamples{SampleNum}.fraction_days_with_backlog();
+    FractionDaysWithBacklog(SampleNum) = InventorySamples{SampleNum}.fraction_days_with_backlog();
 end
-meanFractionDaysWithBacklog = mean(MeanFractionDaysWithBacklog);
+meanFractionDaysWithBacklog = mean(FractionDaysWithBacklog);
 fprintf("Mean Fraction of Days With Non-Zero Backlog: %f\n", meanFractionDaysWithBacklog);
 
-binWidth = 0.5; 
-
-% Plot histogram for fraction of days with a non-zero backlog
+% Plot histogram for the fraction of days with a non-zero backlog
 figure;
-histogram(FractionDaysWithBacklog, 'BinWidth', binWidth, 'Normalization', 'probability', 'BinLimits', [0, 1]);
+histogram(FractionDaysWithBacklog, 'Normalization', 'probability');
 title('Fraction of Days With Non-Zero Backlogs');
 xlabel('Fraction');
 ylabel('Probability');
 pause(2);
-
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Collect statistics4 
@@ -153,12 +149,16 @@ fprintf("Mean Delay Time of Backlogged Orders: %f\n", mean_delay_time_backlogged
 pause(2);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Collect statistics5
-TotalBacklogPerDay = zeros(NumSamples, 1);
+TotalBacklogPerDay = zeros(NumSamples, MaxTime);  
 for SampleNum = 1:NumSamples
     inventory = InventorySamples{SampleNum};
-    TotalBacklogPerDay(SampleNum) = sum(cellfun(@(x) x.Amount, inventory.Backlog));
+    for Day = 1:length(inventory.Log.Time)  
+        TotalBacklogPerDay(SampleNum, Day) = inventory.Log.Backlog(Day);
+    end
 end
-MeanTotalBacklog = mean(TotalBacklogPerDay(TotalBacklogPerDay > 0));
+
+DaysWithBacklog = TotalBacklogPerDay > 0;
+MeanTotalBacklog = mean(TotalBacklogPerDay(DaysWithBacklog));
 fprintf("Mean Total Backlog Amount on Days with Backlog: %f\n", MeanTotalBacklog);
 
 % Plot histogram for total backlog amount on days with backlog
