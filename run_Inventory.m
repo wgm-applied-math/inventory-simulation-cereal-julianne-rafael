@@ -158,10 +158,8 @@ for SampleNum = 1:NumSamples
     inventory = InventorySamples{SampleNum};
     TotalBacklogPerDay(SampleNum) = sum(cellfun(@(x) x.Amount, inventory.Backlog));
 end
-DaysWithBacklog = TotalBacklogPerDay > 0;
-MeanTotalBacklog = mean(TotalBacklogPerDay(DaysWithBacklog));
+MeanTotalBacklog = mean(TotalBacklogPerDay(TotalBacklogPerDay > 0));
 fprintf("Mean Total Backlog Amount on Days with Backlog: %f\n", MeanTotalBacklog);
-
 
 % Plot histogram for total backlog amount on days with backlog
 figure();
