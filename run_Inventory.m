@@ -17,16 +17,16 @@ L = 2;
 h = 0.05/7;
 
 % Reorder point.
-ROP = 50;
+ROP = 141.529;
 
 % Batch size.
-Q = 200;
+Q = 757.62;
 
 % How many samples of the simulation to run.
-NumSamples = 50;
+NumSamples = 100;
 
 % Run each sample for this many days.
-MaxTime = 100;
+MaxTime = 1000;
 
 %% Run simulation samples
 
