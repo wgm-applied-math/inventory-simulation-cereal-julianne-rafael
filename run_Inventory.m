@@ -110,12 +110,16 @@ ylabel('Probability');
 pause(2);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Collect statistics3
-FractionDaysWithBacklog = zeros(NumSamples, 1);
+TotalBacklogDays = zeros(NumSamples, 1);
 for SampleNum = 1:NumSamples
-    FractionDaysWithBacklog(SampleNum) = InventorySamples{SampleNum}.fraction_days_with_backlog();
+    inventory = InventorySamples{SampleNum};
+    TotalBacklogDays(SampleNum) = sum(inventory.Log.Backlog > 0);
 end
+
+
+FractionDaysWithBacklog = TotalBacklogDays / MaxTime;
 meanFractionDaysWithBacklog = mean(FractionDaysWithBacklog);
-fprintf("Mean Fraction of Days With Non-Zero Backlog: %f\n", meanFractionDaysWithBacklog);
+fprintf("Mean Fraction of Days With Backlog: %f\n", meanFractionDaysWithBacklog);
 
 % Plot histogram for the fraction of days with a non-zero backlog
 figure;
@@ -123,6 +127,7 @@ histogram(FractionDaysWithBacklog, 'Normalization', 'probability');
 title('Fraction of Days With Non-Zero Backlogs');
 xlabel('Fraction');
 ylabel('Probability');
+
 pause(2);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -141,7 +146,7 @@ title('Delay Times of Backlogged Orders');
 xlabel('Delay Time');
 ylabel('Probability');
 
-% Compute mean delay time of backlogged orders
+
 mean_delay_time_backlogged = mean(delayTimesAllSamples);
 fprintf("Mean Delay Time of Backlogged Orders: %f\n", mean_delay_time_backlogged);
 
