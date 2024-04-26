@@ -19,6 +19,7 @@ h = 0.05/7;
 % Reorder point.
 ROP = 141.529;
 
+
 % Batch size.
 Q = 757.62;
 
@@ -114,14 +115,14 @@ end
 meanFractionDaysWithBacklog = mean(FractionDaysWithBacklog);
 fprintf("Mean Fraction of Days With Non-Zero Backlog: %f\n", meanFractionDaysWithBacklog);
 
-binWidth = 0.5; 
-
-% Plot histogram for fraction of days with a non-zero backlog
+% Plot histogram for the fraction of days with a non-zero backlog
 figure;
-histogram(FractionDaysWithBacklog, 'BinWidth', binWidth, 'Normalization', 'probability', 'BinLimits', [0, 1]);
+histogram(FractionDaysWithBacklog, 'Normalization', 'probability');
 title('Fraction of Days With Non-Zero Backlogs');
 xlabel('Fraction');
 ylabel('Probability');
+
+
 pause(2);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Collect statistics4 
@@ -147,14 +148,17 @@ fprintf("Mean Delay Time of Backlogged Orders: %f\n", mean_delay_time_backlogged
 pause(2);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Collect statistics5
-TotalBacklogPerDay = zeros(NumSamples, 1);
+TotalBacklogPerDay = zeros(NumSamples, MaxTime);  
 for SampleNum = 1:NumSamples
     inventory = InventorySamples{SampleNum};
-    TotalBacklogPerDay(SampleNum) = sum(cellfun(@(x) x.Amount, inventory.Backlog));
+    for Day = 1:length(inventory.Log.Time)  
+        TotalBacklogPerDay(SampleNum, Day) = inventory.Log.Backlog(Day);
+    end
 end
-MeanTotalBacklog = mean(TotalBacklogPerDay(TotalBacklogPerDay > 0));
-fprintf("Mean Total Backlog Amount on Days with Backlog: %f\n", MeanTotalBacklog);
 
+DaysWithBacklog = TotalBacklogPerDay > 0;
+MeanTotalBacklog = mean(TotalBacklogPerDay(DaysWithBacklog));
+fprintf("Mean Total Backlog Amount on Days with Backlog: %f\n", MeanTotalBacklog);
 
 % Plot histogram for total backlog amount on days with backlog
 figure();
@@ -164,7 +168,5 @@ xlabel('Total Backlog Amount');
 ylabel('Probability');
 
 pause(2)
-
-
 
 
