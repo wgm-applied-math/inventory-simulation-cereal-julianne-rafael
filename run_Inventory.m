@@ -17,16 +17,16 @@ L = 2;
 h = 0.05/7;
 
 % Reorder point.
-ROP = 50;
+ROP = 141.529;
 
 % Batch size.
-Q = 200;
+Q = 757.62;
 
 % How many samples of the simulation to run.
-NumSamples = 50;
+NumSamples = 100;
 
 % Run each sample for this many days.
-MaxTime = 100;
+MaxTime = 1000;
 
 %% Run simulation samples
 
@@ -152,8 +152,7 @@ for SampleNum = 1:NumSamples
     inventory = InventorySamples{SampleNum};
     TotalBacklogPerDay(SampleNum) = sum(cellfun(@(x) x.Amount, inventory.Backlog));
 end
-DaysWithBacklog = TotalBacklogPerDay > 0;
-MeanTotalBacklog = mean(TotalBacklogPerDay(DaysWithBacklog));
+MeanTotalBacklog = mean(TotalBacklogPerDay(TotalBacklogPerDay > 0));
 fprintf("Mean Total Backlog Amount on Days with Backlog: %f\n", MeanTotalBacklog);
 
 
