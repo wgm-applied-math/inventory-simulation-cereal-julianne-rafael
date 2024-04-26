@@ -255,6 +255,9 @@ classdef Inventory < handle
             % *Note:* There is no separate RecordToLog event in this
             % simulation like there is in ServiceQueue.
 
+            obj.TotalDays = obj.TotalDays + 1;
+            
+
             obj.RunningCost = obj.RunningCost ...
                 + obj.OnHand * obj.HoldingCostPerUnitPerDay;
             obj.RunningCost = obj.RunningCost ...
@@ -264,9 +267,7 @@ classdef Inventory < handle
             schedule_event(obj, BeginDay(Time=obj.Time));
 
 
-            if total_backlog(obj) > 0
-                obj.TotalDaysWithBacklog = obj.TotalDaysWithBacklog + 1;
-            end
+            
         end
 
 
@@ -301,18 +302,20 @@ classdef Inventory < handle
         end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        
-        function frac = fraction_days_with_backlog(obj)
-            obj.TotalDays = obj.TotalDays + 1;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%        
+        function frac = fraction_days_with_backlog(obj, MaxTime)
+    
+    
             if total_backlog(obj) > 0
-                obj.TotalDaysWithBacklog = obj.TotalDaysWithBacklog + 1;
+               obj.TotalDaysWithBacklog = obj.TotalDaysWithBacklog + 1;
             end
-            
+    
+    
             days_with_backlog = obj.TotalDaysWithBacklog;
             total_days = obj.TotalDays;
-            frac = days_with_backlog / total_days;
-        end
+            frac = days_with_backlog / MaxTime;
+         end
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
