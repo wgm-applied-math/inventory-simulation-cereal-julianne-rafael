@@ -49,12 +49,12 @@ classdef Inventory < handle
 
         % OutgoingSizeDist - Distribution sampled to determine the size of
         % random outgoing orders placed to this inventory.
-        OutgoingSizeDist = makedist("Gamma", a=10, b=2);
+        OutgoingSizeDist = makedist('Gamma', a=10, b=2);
 
         % DailyOrderCountDist - Distribution sampled to determine the
         % number of random outgoing orders placed to this inventory per
         % day.
-        DailyOrderCountDist = makedist("Poisson", lambda=4);
+        DailyOrderCountDist = makedist('Poisson', lambda=4);
     end
     properties (SetAccess = private)
         % Time - Current time
@@ -88,6 +88,21 @@ classdef Inventory < handle
 
         % Fulfilled - List of fulfilled orders.
         Fulfilled = {};
+
+
+        % Total number of orderes received
+        TotalOrdersReceived = 0;
+
+        % Total number of backlogged orders
+        TotalBackloggedOrders = 0;
+
+        % Total number of days with a non-zero backlog
+        TotalDaysWithBacklog = 0;
+
+        %Total number of days
+        TotalsDays = 0;
+
+        BackloggedOrderDelayTimes = [];
     end
     methods
         function obj = Inventory(KWArgs)
@@ -196,6 +211,18 @@ classdef Inventory < handle
                 order_cost = obj.RequestCostPerBatch ...
                     + obj.RequestBatchSize * obj.RequestCostPerUnit;
                 obj.RunningCost = obj.RunningCost + order_cost;
+
+                L = rand;
+                if L <=01.
+                    select = 2;
+                elseif L <= 0.3
+                    select = 3;
+                elseif L <= 0.7
+                    select = 4;
+                elseif L <= 1.0
+                    select 5;
+                end
+
                 arrival = ShipmentArrival( ...
                     Time=floor(obj.Time+obj.RequestLeadTime), ...
                     Amount=obj.RequestBatchSize);
@@ -257,5 +284,53 @@ classdef Inventory < handle
             tb = total_backlog(obj);
             obj.Log(end+1, :) = {obj.Time, obj.OnHand, tb, obj.RunningCost};
         end
+        
+        function frac = fraction_orders_backlogged(obj)
+            NFulfilled = length(obj.Fulfilled);
+            NBacklogged = 0;
+            for j = 1:NFulfilled
+                x = obj.Fulfilled;
+                if x.Time > x.OriginalTime
+                    NBacklogged = NBacklogged + 1;
+                end
+            end
+            frac = NBacklogged / NFulfilled;
+        end
+
+        function frac = fraction_days_with_backlog(obj)
+            obj.TotalDays = obj.TotalDays + 1;
+            if total_backlog(obj) > 0
+                obj.TotalDaysWithBacklog = obj.TotalDaysWithBacklog + 1;
+            end
+
+            days_with_backlog = obj.TotalDaysWithBacklog;
+            total_days = obj.TotalDays;
+            frac = days_with_backlog / total_days;
+        end
+
+
+        function dt = delay_time_backlogged(obj)
+            delaytimes = 1[];
+            for j = 1:length(obj.Fulfilled)
+                order = obj.Fulfilled{j};
+                if order.OriginalTime < order.Time
+                    delaytimes(end+1) = order.time - order.OriginalTime;
+                end
+            end
+        end
+
+
     end
 end
+
+
+
+
+
+
+
+
+
+
+
+
